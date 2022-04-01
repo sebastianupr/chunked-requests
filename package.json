@@ -2,7 +2,7 @@
   "name": "chunked-requests",
   "version": "0.0.1",
   "description": "Chunked requests",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon",
     "example": "ts-node ./src/example/index.js",

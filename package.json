@@ -1,6 +1,6 @@
 {
   "name": "chunked-requests",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Chunked requests",
   "main": "dist/index.js",
   "scripts": {

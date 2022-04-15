@@ -1,4 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var fetchChunkedRequests_1 = require("./fetchChunkedRequests");
-exports.default = fetchChunkedRequests_1.fetchChunkedRequests;
+var fetch_chunked_requests_1 = require("./fetch-chunked-requests");
+exports.default = fetch_chunked_requests_1.default;
+//# sourceMappingURL=index.js.map

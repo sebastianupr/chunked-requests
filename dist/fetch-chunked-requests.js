@@ -45,20 +45,15 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchChunkedRequests = void 0;
-var noop = function () { };
-var delayForEachChunk = function (delay) { return new Promise(function (resolve) { return setTimeout(function () { return resolve(); }, delay); }); };
-var ChunkDefaults;
-(function (ChunkDefaults) {
-    ChunkDefaults[ChunkDefaults["CHUNK_SIZE"] = 10] = "CHUNK_SIZE";
-    ChunkDefaults[ChunkDefaults["CHUNK_DELAY"] = 1000] = "CHUNK_DELAY";
-})(ChunkDefaults || (ChunkDefaults = {}));
+var utils_1 = require("./utils");
+var DEFAULT_CHUNK_SIZE = 10;
+var DEFAULT_CHUNK_DELAY = 1000;
 var fetchChunkedRequests = function (_a) {
-    var listOfPayloads = _a.listOfPayloads, _b = _a.chunkSize, chunkSize = _b === void 0 ? ChunkDefaults.CHUNK_SIZE : _b, _c = _a.chunkDelay, chunkDelay = _c === void 0 ? ChunkDefaults.CHUNK_DELAY : _c, _d = _a.fetcher, fetcher = _d === void 0 ? function () { return Promise.resolve(); } : _d, _e = _a.transformChunkends, transformChunkends = _e === void 0 ? function (chunkends) { return chunkends; } : _e, _f = _a.transformResponse, transformResponse = _f === void 0 ? function (response) { return response; } : _f, _g = _a.onChunkHasFetched, onChunkHasFetched = _g === void 0 ? noop : _g, _h = _a.onChunkedRequestsFinish, onChunkedRequestsFinish = _h === void 0 ? noop : _h;
+    var listOfPayloads = _a.listOfPayloads, _b = _a.chunkSize, chunkSize = _b === void 0 ? DEFAULT_CHUNK_SIZE : _b, _c = _a.chunkDelay, chunkDelay = _c === void 0 ? DEFAULT_CHUNK_DELAY : _c, fetcher = _a.fetcher, transformChunkends = _a.transformChunkends, transformResponse = _a.transformResponse, _d = _a.onChunkHasFetched, onChunkHasFetched = _d === void 0 ? utils_1.noop : _d, _e = _a.onChunkedRequestsFinish, onChunkedRequestsFinish = _e === void 0 ? utils_1.noop : _e;
     return __awaiter(void 0, void 0, void 0, function () {
         var payloadsFetcheds, currentChunked, chunkedsPayloads, LIMIT, fetchCurrentChunkedRequests, resolveAllRequest, fetchAllChunkedsRequests;
-        return __generator(this, function (_j) {
-            switch (_j.label) {
+        return __generator(this, function (_f) {
+            switch (_f.label) {
                 case 0:
                     payloadsFetcheds = [];
                     currentChunked = 0;
@@ -67,25 +62,40 @@ var fetchChunkedRequests = function (_a) {
                             var chunked = listOfPayloads.slice(index, index + chunkSize);
                             return __spreadArray(__spreadArray([], acc, true), [chunked], false);
                         }
-                        return acc;
+                        return __spreadArray([], acc, true);
                     }, []);
                     LIMIT = chunkedsPayloads.length - 1;
                     fetchCurrentChunkedRequests = function (fetchNextChunk, resolveNextChunk) { return __awaiter(void 0, void 0, void 0, function () {
-                        var payloadsToFetch, response, transformedData;
+                        var transformedChunkends, payloadsToFetch, response, transformedData;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    payloadsToFetch = transformChunkends(chunkedsPayloads[currentChunked]).map(fetcher);
-                                    return [4 /*yield*/, Promise.all(payloadsToFetch)];
+                                    transformedChunkends = typeof transformChunkends === 'function'
+                                        ? transformChunkends(chunkedsPayloads[currentChunked])
+                                        : chunkedsPayloads[currentChunked];
+                                    payloadsToFetch = transformedChunkends.map(function (current) {
+                                        if (typeof fetcher !== 'function') {
+                                            throw new Error('Fetcher is not defined');
+                                        }
+                                        if (typeof current === 'undefined') {
+                                            throw new Error('Current chunked is not defined');
+                                        }
+                                        return fetcher(current);
+                                    });
+                                    return [4 /*yield*/, Promise.all(payloadsToFetch)
+                                        // If the response is not an array, it means that the API is down
+                                    ];
                                 case 1:
                                     response = _a.sent();
                                     // If the response is not an array, it means that the API is down
-                                    if (!response || response.length === 0 || !Array.isArray(response)) {
-                                        return [2 /*return*/, true];
+                                    if (!response || !Array.isArray(response)) {
+                                        throw new Error('The response is not an array, check your fetcher function and try again');
                                     }
-                                    transformedData = transformResponse(response);
+                                    transformedData = typeof transformResponse === 'function'
+                                        ? transformResponse(response)
+                                        : response;
                                     // Delay for each chunk, this is for server timeout
-                                    return [4 /*yield*/, delayForEachChunk(chunkDelay)];
+                                    return [4 /*yield*/, (0, utils_1.delayForEachChunk)(chunkDelay)];
                                 case 2:
                                     // Delay for each chunk, this is for server timeout
                                     _a.sent();
@@ -105,6 +115,7 @@ var fetchChunkedRequests = function (_a) {
                     }); };
                     fetchAllChunkedsRequests = function (currentResolve, initialization) {
                         if (initialization === void 0) { initialization = false; }
+                        // eslint-disable-next-line no-async-promise-executor
                         return new Promise(function (resolve) { return __awaiter(void 0, void 0, void 0, function () {
                             var hasFinish;
                             return __generator(this, function (_a) {
@@ -126,11 +137,12 @@ var fetchChunkedRequests = function (_a) {
                     };
                     return [4 /*yield*/, fetchAllChunkedsRequests(undefined, true)];
                 case 1:
-                    _j.sent();
+                    _f.sent();
                     onChunkedRequestsFinish(payloadsFetcheds);
                     return [2 /*return*/, payloadsFetcheds];
             }
         });
     });
 };
-exports.fetchChunkedRequests = fetchChunkedRequests;
+exports.default = fetchChunkedRequests;
+//# sourceMappingURL=fetch-chunked-requests.js.map

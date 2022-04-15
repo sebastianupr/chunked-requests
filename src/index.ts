@@ -1,3 +1,3 @@
-import { fetchChunkedRequests } from './fetchChunkedRequests';
+import fetchChunkedRequests from './fetch-chunked-requests'
 
-export default fetchChunkedRequests;
+export default fetchChunkedRequests

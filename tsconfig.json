@@ -1,18 +1,28 @@
 {
+  "compileOnSave": true,
   "compilerOptions": {
     "target": "es5",                          
     "module": "commonjs",                    
     "lib": ["es6"],                     
     "allowJs": true,
-    "outDir": "dist",                          
-    "rootDir": "src",
-    "strict": true,         
+    "outDir": "./dist",                          
+    "rootDir": "./src",
+    "sourceMap": true,
+    "declaration": true,
+    "experimentalDecorators": true,
+    "allowUnreachableCode": false,
+    "noImplicitReturns": true,
     "noImplicitAny": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
   },
+  "ts-node": {
+    "files": true
+  },
+  "include": [
+    "./**/*"
+  ],
   "exclude": [
-    "node_modules",
-    "src/example/**/*.ts"
+    "./src/types/**/*",
+    "./src/example/**/*",
+    "./dist/**/*"
   ]
 }

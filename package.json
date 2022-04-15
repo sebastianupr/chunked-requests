@@ -1,13 +1,14 @@
 {
   "name": "chunked-requests",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Chunked requests",
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon",
-    "example": "ts-node ./src/example/index.js",
+    "example": "ts-node ./src/example/index.ts",
     "build": "rimraf ./dist && tsc",
     "start": "npm run dist && node dist/index.js",
+    "lint": "eslint src/**/*.ts --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,12 +22,19 @@
     "url": "https://github.com/sebastianupr/chunked-requests/issues"
   },
   "homepage": "https://github.com/sebastianupr/chunked-requests#readme",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^17.0.23",
+    "@typescript-eslint/eslint-plugin": "^5.19.0",
+    "@typescript-eslint/parser": "^5.19.0",
     "axios": "^0.26.1",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
     "nodemon": "^2.0.15",
+    "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3"

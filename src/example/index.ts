@@ -9,7 +9,7 @@ const example = async () => {
     const fetcher = async (payload: typeof LIST_OF_PAYLOADS['0']) => {
       // Fetch post of JSON placeholder API
       const response = await axios.get(
-        `https://jsonplaceholder.typicode.com/sts/${payload.id}`
+        `https://jsonplaceholder.typicode.com/posts/${payload.id}`
       )
       return response.data as Array<{
         userId: number

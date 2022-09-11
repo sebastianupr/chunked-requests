@@ -1,25 +1,34 @@
 import { noop, delayForEachChunk } from './utils'
-import { IFetchChunkedRequestsParams } from './types'
-import type { TResolve, Tnoop } from './types'
+import type { FetchChunkedRequestsParams, Resolve, Noop } from './types'
 
 const DEFAULT_CHUNK_SIZE = 10
 const DEFAULT_CHUNK_DELAY = 1_000
 
-const fetchChunkedRequests = async <TPayload = any, TFetcherResponse = any>({
+const fetchChunkedRequests = async <
+  TPayload,
+  TTransformedData,
+  TFetcherResponse,
+  TTransformedResponse
+>({
   listOfPayloads,
   chunkSize = DEFAULT_CHUNK_SIZE,
   chunkDelay = DEFAULT_CHUNK_DELAY,
   fetcher,
-  transformChunkends,
+  transformData,
   transformResponse,
   onChunkHasFetched = noop,
   onChunkedRequestsFinish = noop
-}: IFetchChunkedRequestsParams<TPayload>) => {
-  let payloadsFetcheds: any[] = []
+}: FetchChunkedRequestsParams<
+  TPayload,
+  TTransformedData,
+  TFetcherResponse,
+  TTransformedResponse
+>) => {
+  let payloadsFetched: (Awaited<TFetcherResponse> | TTransformedResponse)[] = []
   let currentChunked: number = 0
 
-  // Parition the list of payloads into chunks
-  const chunkedsPayloads: Array<TPayload[]> = listOfPayloads.reduce(
+  // Partition the list of payloads into chunks
+  const chunkedPayloads: Array<TPayload[]> = listOfPayloads.reduce(
     (acc: Array<TPayload[]>, _, index: number) => {
       if (index % chunkSize === 0) {
         const chunked: TPayload[] = listOfPayloads.slice(
@@ -33,26 +42,26 @@ const fetchChunkedRequests = async <TPayload = any, TFetcherResponse = any>({
     []
   )
 
-  const LIMIT = chunkedsPayloads.length - 1
+  const chunkLimit = chunkedPayloads.length - 1
 
   const fetchCurrentChunkedRequests = async (
-    fetchNextChunk: (resolve: TResolve) => void,
-    resolveNextChunk: TResolve
+    fetchNextChunk: (resolve: Resolve) => void,
+    resolveNextChunk: Resolve
   ) => {
     // Transform chunked payloads and invoke fetcher
-    const transformedChunkends =
-      typeof transformChunkends === 'function'
-        ? transformChunkends(chunkedsPayloads[currentChunked])
-        : chunkedsPayloads[currentChunked]
+    const data =
+      typeof transformData === 'function'
+        ? transformData(chunkedPayloads[currentChunked])
+        : chunkedPayloads[currentChunked]
 
-    const payloadsToFetch = transformedChunkends.map((current) => {
+    const payloadsToFetch = data.map((current) => {
       if (typeof fetcher !== 'function') {
         throw new Error('Fetcher is not defined')
       }
       if (typeof current === 'undefined') {
         throw new Error('Current chunked is not defined')
       }
-      return fetcher<TFetcherResponse>(current)
+      return fetcher(current)
     })
 
     // Fetch all payloads in the current chunk
@@ -74,12 +83,12 @@ const fetchChunkedRequests = async <TPayload = any, TFetcherResponse = any>({
     // Delay for each chunk, this is for server timeout
     await delayForEachChunk(chunkDelay)
 
-    payloadsFetcheds = [...payloadsFetcheds, ...transformedData]
+    payloadsFetched = [...payloadsFetched, ...transformedData]
 
-    onChunkHasFetched(payloadsFetcheds)
+    onChunkHasFetched(payloadsFetched)
 
     // Call next chunk
-    if (currentChunked < LIMIT) {
+    if (currentChunked < chunkLimit) {
       // If the current chunk is the last chunk, resolve the promise
       currentChunked++
       fetchNextChunk(resolveNextChunk)
@@ -90,31 +99,35 @@ const fetchChunkedRequests = async <TPayload = any, TFetcherResponse = any>({
     return true
   }
 
-  let resolveAllRequest: TResolve
+  let resolveAllRequest: Resolve
 
-  const fetchAllChunkedsRequests = (
-    currentResolve?: Tnoop,
+  const fetchAllChunksRequests = (
+    currentResolve?: Noop,
     initialization: boolean = false
   ) =>
     // eslint-disable-next-line no-async-promise-executor
-    new Promise(async (resolve) => {
-      if (initialization) resolveAllRequest = resolve
+    new Promise(async (resolve, reject) => {
+      try {
+        if (initialization) resolveAllRequest = resolve
 
-      const hasFinish = await fetchCurrentChunkedRequests(
-        fetchAllChunkedsRequests,
-        resolve
-      )
-      if (hasFinish && currentResolve) {
-        resolveAllRequest()
-        currentResolve()
+        const hasFinish = await fetchCurrentChunkedRequests(
+          fetchAllChunksRequests,
+          resolve
+        )
+        if (hasFinish && currentResolve) {
+          resolveAllRequest()
+          currentResolve()
+        }
+      } catch (error) {
+        reject(new Error(error))
       }
     })
 
-  await fetchAllChunkedsRequests(undefined, true)
+  await fetchAllChunksRequests(undefined, true)
 
-  onChunkedRequestsFinish(payloadsFetcheds)
+  onChunkedRequestsFinish(payloadsFetched)
 
-  return payloadsFetcheds
+  return payloadsFetched
 }
 
 export default fetchChunkedRequests

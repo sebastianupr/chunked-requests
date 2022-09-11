@@ -2,27 +2,30 @@ import axios from 'axios'
 import fetchChunkedRequests from '../fetch-chunked-requests'
 import { LIST_OF_PAYLOADS } from './payload'
 
-type TPayload = {
-  id: number
-}
-
 const example = async () => {
   try {
-    console.log('Runing example...')
-    const fetcher = async (payload: TPayload) => {
+    console.log('Running example...')
+
+    const fetcher = async (payload: typeof LIST_OF_PAYLOADS['0']) => {
+      // Fetch post of JSON placeholder API
       const response = await axios.get(
         `https://jsonplaceholder.typicode.com/posts/${payload.id}`
       )
-      return response.data
+      return response.data as Array<{
+        userId: number
+        id: number
+        title: string
+        body: string
+      }>
     }
 
-    const allDataFetched = await fetchChunkedRequests<TPayload, any>({
+    const allDataFetched = await fetchChunkedRequests({
       listOfPayloads: LIST_OF_PAYLOADS,
       chunkSize: 10,
       chunkDelay: 1000,
       fetcher,
-      transformChunkends: (chunkends) =>
-        chunkends.filter(({ id }) => typeof id === 'number'),
+      transformData: (chunks) =>
+        chunks.filter(({ id }) => typeof id === 'number'),
       transformResponse: (response) => response,
       onChunkHasFetched: (currentsChunks) => {
         console.log('Chunk has been fetched', currentsChunks)
@@ -32,11 +35,9 @@ const example = async () => {
       }
     })
 
-    console.log('allDataFetched', allDataFetched)
+    console.log('All data fetched!!! 🥳', allDataFetched)
   } catch (error) {
-    console.error(error)
-  } finally {
-    console.log('All requests have been finished')
+    console.error('Error with fetch 😢', error)
   }
 }
 

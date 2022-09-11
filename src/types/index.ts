@@ -1,14 +1,25 @@
-export type Tnoop = () => void;
+export type Noop = () => void
 
-export type TResolve = (value?: unknown) => void;
+export type Resolve = (value?: unknown) => void
 
-export interface IFetchChunkedRequestsParams<TPayload> {
-  listOfPayloads: TPayload[];
-  chunkSize?: number;
-  chunkDelay?: number;
-  fetcher: <T>(payload: TPayload) => Promise<T>;
-  transformChunkends?: (chunkends: TPayload[]) => TPayload[];
-  transformResponse?: (response: any) => any;
-  onChunkHasFetched?: (currentsChunks: any) => void;
-  onChunkedRequestsFinish?: (chunkEnd: any) => void;
+export type FetchChunkedRequestsParams<
+  TPayload,
+  TTransformedData,
+  TFetcherResponse,
+  TTransformedResponse
+> = {
+  listOfPayloads: TPayload[]
+  chunkSize?: number
+  chunkDelay?: number
+  transformData?: (chunk: TPayload[]) => TTransformedData[]
+  fetcher: (payload: TPayload | TTransformedData) => Promise<TFetcherResponse>
+  transformResponse?: (
+    response: Awaited<TFetcherResponse>[]
+  ) => TTransformedResponse[]
+  onChunkHasFetched?: (
+    currentsChunks: (TTransformedResponse | Awaited<TFetcherResponse>)[]
+  ) => void
+  onChunkedRequestsFinish?: (
+    chunkEnd: (TTransformedResponse | Awaited<TFetcherResponse>)[]
+  ) => void
 }

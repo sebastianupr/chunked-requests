@@ -1,6 +1,6 @@
 {
   "name": "chunked-requests",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Chunked requests",
   "main": "dist/index.js",
   "scripts": {
@@ -15,8 +15,13 @@
     "type": "git",
     "url": "git+https://github.com/sebastianupr/chunked-requests.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "chunked",
+    "requests",
+    "axios",
+    "node"
+  ],
+  "author": "Sebastián Urbano",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/sebastianupr/chunked-requests/issues"

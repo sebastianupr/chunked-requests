@@ -1,5 +1,5 @@
-import { noop, delayForEachChunk } from './utils'
-import type { FetchChunkedRequestsParams, Resolve, Noop } from './types'
+import { delayForEachChunk } from './utils'
+import type { Params, Resolve, Noop } from './types'
 
 const DEFAULT_CHUNK_SIZE = 10
 const DEFAULT_CHUNK_DELAY = 1_000
@@ -16,9 +16,9 @@ const fetchChunkedRequests = async <
   fetcher,
   transformData,
   transformResponse,
-  onChunkHasFetched = noop,
-  onChunkedRequestsFinish = noop
-}: FetchChunkedRequestsParams<
+  onChunkHasFetched,
+  onChunkedRequestsFinish
+}: Params<
   TPayload,
   TTransformedData,
   TFetcherResponse,
@@ -37,7 +37,7 @@ const fetchChunkedRequests = async <
         )
         return [...acc, chunked]
       }
-      return [...acc]
+      return acc
     },
     []
   )
@@ -67,7 +67,7 @@ const fetchChunkedRequests = async <
     // Fetch all payloads in the current chunk
     const response = await Promise.all(payloadsToFetch)
 
-    // If the response is not an array, it means that the API is down
+    // If the response is not an array, throw an error
     if (!response || !Array.isArray(response)) {
       throw new Error(
         'The response is not an array, check your fetcher function and try again'
@@ -81,11 +81,13 @@ const fetchChunkedRequests = async <
         : response
 
     // Delay for each chunk, this is for server timeout
-    await delayForEachChunk(chunkDelay)
+    if (typeof chunkDelay !== 'number') {
+      await delayForEachChunk(chunkDelay)
+    }
 
     payloadsFetched = [...payloadsFetched, ...transformedData]
 
-    onChunkHasFetched(payloadsFetched)
+    onChunkHasFetched?.(payloadsFetched)
 
     // Call next chunk
     if (currentChunked < chunkLimit) {
@@ -125,7 +127,7 @@ const fetchChunkedRequests = async <
 
   await fetchAllChunksRequests(undefined, true)
 
-  onChunkedRequestsFinish(payloadsFetched)
+  onChunkedRequestsFinish?.(payloadsFetched)
 
   return payloadsFetched
 }

@@ -2,7 +2,7 @@ export type Noop = () => void
 
 export type Resolve = (value?: unknown) => void
 
-export type FetchChunkedRequestsParams<
+export type Params<
   TPayload,
   TTransformedData,
   TFetcherResponse,

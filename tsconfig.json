@@ -1,28 +1,29 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "target": "es5",                          
-    "module": "commonjs",                    
-    "lib": ["es6"],                     
+    "target": "es5",
+    "module": "commonjs",
+    "lib": ["es6"],
     "allowJs": true,
-    "outDir": "./dist",                          
+    "outDir": "./dist",
     "rootDir": "./src",
     "sourceMap": true,
     "declaration": true,
     "experimentalDecorators": true,
     "allowUnreachableCode": false,
     "noImplicitReturns": true,
-    "noImplicitAny": true,
+    "noImplicitAny": true
   },
   "ts-node": {
     "files": true
   },
-  "include": [
-    "./**/*"
-  ],
+  "include": ["./**/*"],
   "exclude": [
     "./src/types/**/*",
     "./src/example/**/*",
-    "./dist/**/*"
+    "./dist/**/*",
+    "./node_modules/**/*",
+    "./.eslintrc.js",
+    "./.eslintignore"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "chunked-requests",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Chunked requests",
   "main": "dist/index.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "node"
   ],
   "author": "Sebastián Urbano",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/sebastianupr/chunked-requests/issues"
   },

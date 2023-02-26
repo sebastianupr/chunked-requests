@@ -9,7 +9,7 @@ This library allows you to make chunked requests to a server. It is useful when 
 ## Installation
 
 ```bash
-npm install chunked-request
+npm install chunked-requests
 ```
 
 ## Usage
